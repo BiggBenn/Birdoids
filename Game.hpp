@@ -22,8 +22,7 @@ class Game
 	//
 public: 
     
-    //Singleton-type static reference
-    inline static Game* Instance = nullptr;
+    
 
     //world size variables
     int worldWidth;
@@ -55,6 +54,9 @@ public:
     //
 private:
 
+    //Singleton-type static reference
+    inline static Game* Instance = nullptr;
+
     //vectors holding all the game objects, and one to hold game object pointers that should be deleted
     vector<GameObject*> allObjects;
     vector<GameObject*> toDelete;
@@ -71,7 +73,7 @@ private:
     int quadrantSize = 128;
 
     //camera to center on the playing field
-    Camera2D* cam;
+    Camera2D cam;
 
     //win variable, if this is true the player has won
     bool victory = false;
@@ -81,8 +83,8 @@ private:
     //
 public: 
 
-    //constructor
-    Game();
+    //singleton-style instance retriever
+    static Game* getInstance();
 
     //destructor
     ~Game();
@@ -108,19 +110,22 @@ public:
     //Add a game object to the world
     void AddObject(GameObject* obj, bool update);
 
+    //initializes the game world
+    void InitializeGame();
+
     //
     // Private Functions
     //
 private:
+
+    //constructor
+    Game();
 
     //Removes an object from a quadrant, if it is in there
     void RemoveFromQuadrant(QuadrantKey quadrant, GameObject* obj);
 
     //Adds an object to a quadrant, even if it is already in there.
     void AddToQuadrant(QuadrantKey quadrant, GameObject* obj);
-
-    //initializes the game world
-    void InitializeGame();
 
     //calculates the quadrant vector from a position vector
     QuadrantKey CalculateQuadrant(Vector2 position);

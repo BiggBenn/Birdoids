@@ -5,7 +5,7 @@
 GameObject::GameObject()
 {
 	type = "GameObject";
-	Game::Instance->AddToQuadrantSystem(this);
+	Game::getInstance()->AddToQuadrantSystem(this);
 }
 
 
@@ -38,7 +38,7 @@ void GameObject::Update(float frameTime)
 
 	if (velocity != Vector2Zero())
 	{
-		Game::Instance->OnObjectMoved(this, prevPosition);
+		Game::getInstance()->OnObjectMoved(this, prevPosition);
 	}
 }
 
@@ -79,7 +79,7 @@ void GameObject::setPosition(Vector2 pos)
 {
 	prevPosition = position;
 	position = pos;
-	Game::Instance->OnObjectMoved(this, prevPosition);
+	Game::getInstance()->OnObjectMoved(this, prevPosition);
 }
 
 

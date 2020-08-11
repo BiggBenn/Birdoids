@@ -31,23 +31,25 @@ void Projectile::Update(float frameTime)
 	if (maxLifeTime != 0 && lifeTime > maxLifeTime)
 		deletionFlag = true;
 
+	Game* game = Game::getInstance();
+
 	//too far left
-	if (position.x < Game::Instance->worldLeftBorder - 50)
+	if (position.x < game->worldLeftBorder - 50)
 	{
 		deletionFlag = true;
 	}
 	//too far right
-	else if (position.x > Game::Instance->worldRightBorder + 50)
+	else if (position.x > game->worldRightBorder + 50)
 	{
 		deletionFlag = true;
 	}
 	//too far up
-	else if (position.y < Game::Instance->worldTopBorder - 50)
+	else if (position.y < game->worldTopBorder - 50)
 	{
 		deletionFlag = true;
 	}
 	//too far down
-	else if (position.y > Game::Instance->worldBottomBorder + 50)
+	else if (position.y > game->worldBottomBorder + 50)
 	{
 		deletionFlag = true;
 	}

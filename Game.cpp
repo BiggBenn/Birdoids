@@ -4,9 +4,17 @@
 #include <algorithm>
 
 
+Game* Game::getInstance()
+{
+    //ensure instance exists, or else initialize it
+    if (Instance == nullptr)
+        Instance = new Game();
+    return Instance;
+}
+
 Game::Game()
 {
-    Instance = this;
+
 }
 
 
@@ -34,8 +42,6 @@ bool Game::InitializeWindow(int width, int height)
 // Main loop function, will repeat until the game is closed. Any game logic should be within this.
 void Game::MainLoop()
 {
-    InitializeGame();
-
     while (!WindowShouldClose())
     {
         //
@@ -47,8 +53,10 @@ void Game::MainLoop()
 
             //get the time that passed
             float frameTime = GetFrameTime();
-            if (frameTime > (float)1 / 30)
-                frameTime = (float)1 / 30;
+            if (frameTime > 1.0f/30.0f)
+            {
+                frameTime = 1.0f/30.0f;
+            }
 
             //update timer
             timer += frameTime;
@@ -64,7 +72,7 @@ void Game::MainLoop()
         if (IsKeyPressed(KEY_F1))
         {
             //switch help flag and pause flag
-            helpFlag = !Game::Instance->helpFlag;
+            helpFlag = helpFlag;
             paused = !paused;
         }
 
@@ -75,15 +83,15 @@ void Game::MainLoop()
 
         //signal that drawing in 2D has begun
         BeginDrawing();
-        BeginMode2D(*cam);
+        BeginMode2D(cam);
 
         //first clean up render frame
         ClearBackground(BLACK);
 
         //loop through objects
-        for (int i = 0; i < allObjects.size(); i++)
+        for (GameObject* object: allObjects)
         {
-            allObjects.at(i)->Render();
+            object->Render();
         }
 
         //draw the ui on top
@@ -98,12 +106,9 @@ void Game::MainLoop()
 
 void Game::UpdateObjects(float frameTime)
 {
-    for (int i = 0; i < toUpdate.size(); i++)
+    for (GameObject* obj : toUpdate)
     {
-        //get the object that we're looking at 
-        GameObject* obj = toUpdate.at(i);
-
-        //update it
+        //update object
         obj->Update(frameTime);
         //check if it has triggered a delete flag
         if (obj->deletionFlag)
@@ -118,21 +123,17 @@ void Game::UpdateObjects(float frameTime)
 void Game::HandleDeletion()
 {
     // Clean up objects marked for removal, slow but rare enough
-    for (int i = 0; i < toDelete.size(); i++)
+    for (GameObject* deletee : toDelete)
     {
-        //remove objects from object vectors
-        //_Erase_remove(allObjects, toDelete[i]);
-        //_Erase_remove(toUpdate, toDelete[i]);
-
         //remove object from object vectors using Erase-Remove-idiom
-        allObjects.erase(remove(allObjects.begin(), allObjects.end(), toDelete[i]));
-        toUpdate.erase(remove(toUpdate.begin(), toUpdate.end(), toDelete[i]));
+        allObjects.erase(remove(allObjects.begin(), allObjects.end(), deletee));
+        toUpdate.erase(remove(toUpdate.begin(), toUpdate.end(), deletee));
 
         //remove object from quadrant system, *before* deletion, otherwise positional data will likely be corrupted
-        RemoveFromQuadrantSystem(toDelete[i]);
+        RemoveFromQuadrantSystem(deletee);
 
         //finally delete it 
-        delete toDelete[i];
+        delete deletee;
     }
     //clear deletion vector
     toDelete.clear();
@@ -183,27 +184,25 @@ vector<DistObj> Game::FindNearbyObjects(Vector2 position, float range)
 
 
     //iterate through all quadrants
-    for (int i = 0; i < quadrants.size(); i++)
+    for (QuadrantKey key : quadrants)
     {
         //first check for existence of quadrant
-        if (worldGrid.count(quadrants.at(i)) != 0)
+        if (worldGrid.count(key) != 0)
         {
             //get the relevant quadrant
-            vector<GameObject*> quadrant = worldGrid.at(quadrants.at(i));
-            for (int j = 0; j < quadrant.size(); j++)
+            vector<GameObject*> quadrant = worldGrid.at(key);
+            for (GameObject* obj : quadrant)
             {
-                GameObject* obj = quadrant.at(j);
-
                 //calculate distance (squared for performance saving)
-                float distance = Vector2DistanceSquared(position, obj->getPosition());
+                float distanceSqrd = Vector2DistanceSquared(position, obj->getPosition());
 
                 //subtract object's size from distance
-                distance -= obj->size;
+                distanceSqrd -= obj->size;
 
                 //if distance is larger than range, dont add this to the result
-                if (distance < rangeSqrd)
+                if (distanceSqrd < rangeSqrd)
                 {
-                    result.push_back({ obj, distance });
+                    result.push_back({ obj, distanceSqrd });
                 }
             }
         }
@@ -290,18 +289,9 @@ void Game::InitializeGame()
     int screenHeight = GetScreenHeight();
 
     //set up the camera
-    cam = new Camera2D();
-    cam->target = { 0,0 };
-    cam->offset = { (float)screenWidth / 2, (float)screenHeight / 2 };
-    cam->zoom = 1;
-
-    //add random obstacles for the swarm, just for fun, really.
-    for (int j = 0; j < 0; j++)
-    {
-        GameObject* obstacle = new GameObject();
-        obstacle->setPosition({(float) (rand() % screenWidth - screenWidth / 2) , (float)(rand() % screenHeight - screenHeight / 2) });
-        allObjects.push_back(obstacle);
-    }
+    cam.target = { 0,0 };
+    cam.offset = { (float)screenWidth / 2, (float)screenHeight / 2 };
+    cam.zoom = 1;
 
     //add a bunch of birds
     for (int i = 0; i < 500; i++)
@@ -309,14 +299,12 @@ void Game::InitializeGame()
         Bird* bird = new Bird();
         Vector2 position = { (float)(rand() % screenWidth - screenWidth / 2) , (float)(rand() % screenHeight - screenHeight / 2) };
         bird->setPosition(position * 0.9);  //multiplication with 0.9 is to ensure distance from the borders
-        allObjects.push_back(bird);
-        toUpdate.push_back(bird);
+        AddObject(bird, true);
     }
 
     //spawn the player
     Player* player = new Player();
-    allObjects.push_back(player);
-    toUpdate.push_back(player);
+    AddObject(player, true);
 }
 
 

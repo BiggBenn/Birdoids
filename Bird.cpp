@@ -9,7 +9,7 @@ Bird::Bird() : GameObject()
 	size++;
 	size *= 3;
 
-	Game::Instance->birdCounter++;
+	Game::getInstance()->birdCounter++;
 }
 
 
@@ -18,8 +18,8 @@ Bird::~Bird()
 	neighbors.clear();
 	obstacles.clear();
 
-	Game::Instance->score += 50;
-	Game::Instance->birdCounter--;
+	Game::getInstance()->score += 50;
+	Game::getInstance()->birdCounter--;
 }
 
 
@@ -134,12 +134,12 @@ void Bird::FindNearby(float range)
 
 	//get all nearby objects
 	//because this list is sorted by distance, and we do not mess with the order, the neighbors and obstacles are sorted by distance too
-	vector<DistObj> allNearby = Game::Instance->FindNearbyObjects(getPosition(), range);
+	vector<DistObj> allNearby = Game::getInstance()->FindNearbyObjects(getPosition(), range);
 	
 	//sort the objects into two types, neighbors (birds) and obstacles (player, projectiles, boundaries)
-	for (int i = 0; i < allNearby.size(); i++)
+	for (DistObj object : allNearby)
 	{
-		GameObject* obj = allNearby[i].obj;
+		GameObject* obj = object.obj;
 		if (obj == this)
 		{
 			//don't add to any list
@@ -161,9 +161,9 @@ Vector2 Bird::AverageSpeeds()
 	//prepare result variable
 	Vector2 result = { 0,0 };
 	//add up all the velocities of neighbors into that result
-	for (int i = 0; i < neighbors.size(); i++)
+	for (GameObject* neighbor : neighbors)
 	{
-		result = result + (neighbors[i]->getVelocity() * neighbors[i]->size);
+		result = result + (neighbor->getVelocity() * neighbor->size);
 	}
 
 	//divide result by amount of values
@@ -197,13 +197,15 @@ Vector2 Bird::NearestObstacle()
 	if (obstacles.size() > 0)
 		obstacleDistance = Vector2Distance(obstacles[0]->getPosition(), getPosition());
 
+	Game* game = Game::getInstance();
+
 	//check for being close to boundary
 	Vector2 pos = getPosition();
 	//calculate distances to borders
-	float leftDistance = pos.x - Game::Instance->worldLeftBorder;
-	float rightDistance = Game::Instance->worldRightBorder - pos.x;
-	float topDistance = pos.y - Game::Instance->worldTopBorder;
-	float bottomDistance = Game::Instance->worldBottomBorder - pos.y;
+	float leftDistance = pos.x - game->worldLeftBorder;
+	float rightDistance = game->worldRightBorder - pos.x;
+	float topDistance = pos.y - game->worldTopBorder;
+	float bottomDistance = game->worldBottomBorder - pos.y;
 
 	//check if the borders are within sensory range
 	if (leftDistance < range)
@@ -234,7 +236,7 @@ Vector2 Bird::NearestObstacle()
 
 	//only if the borders arent closer, return the nearest obstacles coordinates, otherwise return the border values
 	if (result == Vector2Zero() && obstacles.size() > 0)
-		result = Vector2Subtract(obstacles[0]->getPosition(), getPosition());
+		result = obstacles[0]->getPosition() - getPosition();
 	else result = Vector2Normalize(result);
 
 	return result;
@@ -246,12 +248,12 @@ Vector2 Bird::AverageNeighborPositions()
 	//prepare result variable
 	Vector2 result = { 0,0 };
 	//add up all the velocities of neighbors into that result
-	for (int i = 0; i < neighbors.size(); i++)
+	for (GameObject* neighbor : neighbors)
 	{
-		result = Vector2Add(result, Vector2Subtract(neighbors[i]->getPosition(), getPosition()));
+		result = result + neighbor->getPosition() - getPosition();
 	}
 	//divide result by amount of values
-	Vector2Divide(result, neighbors.size());
+	result = result/ neighbors.size();
 	return result;
 }
 
@@ -275,7 +277,7 @@ void Bird::CheckForCollision()
 
 	//check if bird is out of bounds
 	Vector2 pos = getPosition();
-	if (pos.x < Game::Instance->worldLeftBorder || pos.x > Game::Instance->worldRightBorder || pos.y < Game::Instance->worldTopBorder || pos.y > Game::Instance->worldBottomBorder)
+	if (pos.x < Game::getInstance()->worldLeftBorder || pos.x > Game::getInstance()->worldRightBorder || pos.y < Game::getInstance()->worldTopBorder || pos.y > Game::getInstance()->worldBottomBorder)
 	{
 		//trigger deletion flag
 		deletionFlag = true;

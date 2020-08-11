@@ -115,27 +115,28 @@ void Player::HandleInput(float frameTime)
 void Player::CheckForOutOfBounds()
 {
 	Vector2 pos = getPosition();
+	Game* game = Game::getInstance();
 
 	//too far left
-	if (pos.x < Game::Instance->worldLeftBorder)
+	if (pos.x < game->worldLeftBorder)
 	{
-		pos.x += Game::Instance->worldWidth;
+		pos.x += game->worldWidth;
 	}
 	//too far right
-	else if (pos.x > Game::Instance->worldRightBorder) 
+	else if (pos.x > game->worldRightBorder)
 	{
-		pos.x -= Game::Instance->worldWidth;
+		pos.x -= game->worldWidth;
 	}
 
 	//too far up
-	if (pos.y < Game::Instance->worldTopBorder)
+	if (pos.y < game->worldTopBorder)
 	{
-		pos.y += Game::Instance->worldHeight;
+		pos.y += game->worldHeight;
 	}
 	//too far down
-	else if (pos.y > Game::Instance->worldBottomBorder)
+	else if (pos.y > game->worldBottomBorder)
 	{
-		pos.y -= Game::Instance->worldHeight;
+		pos.y -= game->worldHeight;
 	}
 
 	//apply these changes
@@ -173,7 +174,7 @@ void Player::FireBullet(Vector2 direction)
 		fireVector = fireVector * speed;
 		Projectile* bullet = new Projectile(lifeTime, fireVector, health, projectileSize);
 		bullet->setPosition(position);
-		Game::Instance->AddObject(bullet, true);
+		Game::getInstance()->AddObject(bullet, true);
 		//reset cooldown
 		fireCooldown = 1 / fireRate;
 	}
@@ -188,7 +189,7 @@ void Player::DropMine()
 		//drop mine at player position with 0 speed (Yes it is just a projectile, the logic works for both)
 		Projectile* mine = new Projectile(mineLifeTime, Vector2Zero(), mineHealth, mineSize);
 		mine->setPosition(position);
-		Game::Instance->AddObject(mine, true);
+		Game::getInstance()->AddObject(mine, true);
 		//reset cooldown
 		mineCooldown = 1 / mineFireRate;
 	}
