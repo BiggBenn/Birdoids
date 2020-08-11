@@ -41,24 +41,24 @@ void Bird::Update(float frameTime)
 	float randomWeight = 5;
 	if (Vector2Length(getVelocity()) < 1)
 		randomWeight = 15;
-	direction = Vector2Add(direction, Vector2Scale(random, randomWeight));
+	direction = direction + random * randomWeight;
 
 	//desire to keep flying where the bird is already flying
 	Vector2 currentDirection = getVelocity();
 	if (currentDirection.x != 0 || currentDirection.y != 0)
 		Vector2Normalize(currentDirection);
 	float continueWeight = 0.5;
-	direction = Vector2Add(direction, Vector2Scale(currentDirection, continueWeight));
+	direction = direction + currentDirection * continueWeight;
 
 	//then get their average direction/speed
-	Vector2 speedDifference = Vector2Subtract(AverageSpeeds(), getVelocity());
+	Vector2 speedDifference = AverageSpeeds() - getVelocity();
 	if (speedDifference != Vector2Zero())
 	{
 		//normalize vector
 		speedDifference = Vector2Normalize(speedDifference);
 		//add this with weight to the direction
 		float speedWeight = 5;
-		direction = Vector2Add(direction, Vector2Scale(speedDifference, speedWeight));
+		direction = direction + speedDifference * speedWeight;
 	}
 	//find the position to cluster to
 	Vector2 targetPosition = AverageNeighborPositions();
@@ -68,7 +68,7 @@ void Bird::Update(float frameTime)
 		targetPosition = Vector2Normalize(targetPosition);
 		//add this with weight to the direction
 		float centerWeight = 2;
-		direction = Vector2Add(direction, Vector2Scale(targetPosition, centerWeight));
+		direction = direction + targetPosition * centerWeight;
 	}
 
 	//find the vector to the nearest neighbor
@@ -87,7 +87,7 @@ void Bird::Update(float frameTime)
 			avoidNeighborWeight /= (distance/ minimumDistance);
 			//accelWeight += 0.1 / (distance / minimumDistance);
 		}
-		direction = Vector2Add(direction, Vector2Scale(nearestNeighbor, -avoidNeighborWeight));
+		direction = direction + nearestNeighbor * -avoidNeighborWeight;
 	}
 	
 
@@ -103,7 +103,7 @@ void Bird::Update(float frameTime)
 		//increase weight and acceleration the closer the boid is to an obstacle
 		avoidObstacleWeight *= (range * range/ (distance));
 		//accelWeight += 0.1 * avoidObstacleWeight;
-		direction = Vector2Add(direction, Vector2Scale(nearestObstacle, -avoidObstacleWeight));
+		direction = direction + nearestObstacle * -avoidObstacleWeight;
 	}
 
 

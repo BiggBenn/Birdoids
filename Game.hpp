@@ -124,6 +124,15 @@ private:
 
     //Draw the ui stuff, score, weapon choice etc
     void DrawUI();
+
+    //Iterates through all objects that need update and updates them
+    void UpdateObjects(float frameTime);
+
+    //Deletes all the objects that are queued up for deletion
+    void HandleDeletion();
+
+    //Checks whether or not the win conditions are met, and if so, triggers the victory flag
+    void CheckForWinCondition();
 };
 
 #endif

@@ -10,9 +10,6 @@ private:
 	//maximum life of projectile
 	float maxLifeTime;
 
-	//velocity of the projectile (set in stone, doesnt slow down)
-	Vector2 constVelocity;
-
 	//Health points of projectile, i.e. how many collisions it can take before being destroyed
 	int healthPoints;
 

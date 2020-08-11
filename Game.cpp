@@ -39,7 +39,7 @@ void Game::MainLoop()
     while (!WindowShouldClose())
     {
         //
-        // Update all game objects, and mark "killed" objects for deletion
+        // Update part of the cycle
         //
 
         if (!victory)
@@ -53,47 +53,16 @@ void Game::MainLoop()
             //update timer
             timer += frameTime;
 
-            for (int i = 0; i < toUpdate.size(); i++)
-            {
-                //get the object that we're looking at 
-                GameObject* obj = toUpdate.at(i);
+            UpdateObjects(frameTime);
 
-                //update it
-                obj->Update(frameTime);
-                //check if it has triggered a delete flag
-                if (obj->deletionFlag)
-                {
-                    //if so, add it to the toDelete vector
-                    toDelete.push_back(obj);
-                }
-            }
+            HandleDeletion();
 
-            //
-            // Clean up objects marked for removal, slow but rare enough
-            //
-            for (int i = 0; i < toDelete.size(); i++)
-            {
-                //remove objects from object vectors
-                _Erase_remove(allObjects, toDelete[i]);
-                _Erase_remove(toUpdate, toDelete[i]);
-
-                //finally delete it 
-                delete toDelete[i];
-            }
-            //clear deletion vector
-            toDelete.clear();
-
-            //check for win condition
-            if (birdCounter <= 0)
-            {
-                victory = true;
-                score = floor(score / floor(timer));
-            }
+            CheckForWinCondition();
         }
 
 
         //
-        // Render all objects
+        // Render section of mainloop
         //
 
         //signal that drawing in 2D has begun
@@ -118,6 +87,57 @@ void Game::MainLoop()
     }
 }
 
+
+void Game::UpdateObjects(float frameTime)
+{
+    for (int i = 0; i < toUpdate.size(); i++)
+    {
+        //get the object that we're looking at 
+        GameObject* obj = toUpdate.at(i);
+
+        //update it
+        obj->Update(frameTime);
+        //check if it has triggered a delete flag
+        if (obj->deletionFlag)
+        {
+            //if so, add it to the toDelete vector
+            toDelete.push_back(obj);
+        }
+    }
+}
+
+
+void Game::HandleDeletion()
+{
+    // Clean up objects marked for removal, slow but rare enough
+    for (int i = 0; i < toDelete.size(); i++)
+    {
+        //remove objects from object vectors
+        _Erase_remove(allObjects, toDelete[i]);
+        _Erase_remove(toUpdate, toDelete[i]);
+
+        //remove object from quadrant system, *before* deletion, otherwise positional data will likely be corrupted
+        RemoveFromQuadrantSystem(toDelete[i]);
+
+        //finally delete it 
+        delete toDelete[i];
+    }
+    //clear deletion vector
+    toDelete.clear();
+}
+
+
+void Game::CheckForWinCondition()
+{
+    //check for win condition
+    if (birdCounter <= 0)
+    {
+        victory = true;
+        score = floor(score / floor(timer));
+    }
+}
+
+
 vector<DistObj> Game::FindNearbyObjects(Vector2 position, float range)
 {
     vector<DistObj> result;
@@ -129,7 +149,7 @@ vector<DistObj> Game::FindNearbyObjects(Vector2 position, float range)
     vector<QuadrantKey> quadrants;
 
     //calculate first quadrant
-    quadrants.push_back(CalculateQuadrant(position));
+    QuadrantKey baseQuadrant = CalculateQuadrant(position);
 
     //calculate the range of quadrants that need to be searched from range
     //If the range is less than the quadrant size, still, by being near the edges, we have to search the quadrant the object is in, and the quadrants surrounding it
@@ -143,8 +163,8 @@ vector<DistObj> Game::FindNearbyObjects(Vector2 position, float range)
         {
             QuadrantKey key;
             //add x and y coordinates to center quadrant to get all quadrants around center
-            key.x = quadrants[0].x + x;
-            key.y = quadrants[0].y + y;
+            key.x = baseQuadrant.x + x;
+            key.y = baseQuadrant.y + y;
             quadrants.push_back(key);
         }
     }
@@ -228,15 +248,12 @@ void Game::RemoveFromQuadrant(QuadrantKey quadrant, GameObject* obj)
     //ensure that quadrant exists
     if (worldGrid.count(quadrant) == 0)
         return;
-    //get beginning and end of relevant quadrant, we can assume that it exists since the object is supposedly in it already
-    vector<GameObject*>::iterator beginning = worldGrid.at(quadrant).begin();
-    vector<GameObject*>::iterator end = worldGrid.at(quadrant).end();
-
-    //remove obj
-    worldGrid.at(quadrant).end() = remove(beginning, end, obj);
+    
+    //use erase remove idiom to remove obj from quadrant 
+    _Erase_remove(worldGrid[quadrant], obj);
 
     //erasing quadrants is practically unnecessary, as the gameworld isn't that big. Otherwise, here empty quadrants could be deleted.
-/*    //check if the quadrant is empty, if so get rid of it
+    /*//check if the quadrant is empty, if so get rid of it
     if (worldGrid.at(quadrant).size() == 0)
         worldGrid.erase(quadrant);*/
 }

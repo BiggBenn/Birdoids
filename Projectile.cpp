@@ -7,7 +7,8 @@ Projectile::Projectile(float maxLife, Vector2 speed, int HP, float projectile_si
 {
 	type = "Projectile";
 	maxLifeTime = maxLife;
-	constVelocity = speed;
+	velocity = speed;
+	//disabling drag ensures that velocity doesnt decrease over time
 	drag = false;
 	size = projectile_size;
 	healthPoints = HP;
@@ -22,8 +23,10 @@ Projectile::~Projectile()
 
 void Projectile::Update(float frameTime)
 {
-	velocity = constVelocity;
+	//update base
 	GameObject::Update(frameTime);;
+	
+	//increment lifetime by frametime, and check for being over the limit
 	lifeTime += frameTime;
 	if (maxLifeTime != 0 && lifeTime > maxLifeTime)
 		deletionFlag = true;
@@ -38,9 +41,8 @@ void Projectile::Update(float frameTime)
 	{
 		deletionFlag = true;
 	}
-
 	//too far up
-	if (position.y < Game::Instance->worldTopBorder - 50)
+	else if (position.y < Game::Instance->worldTopBorder - 50)
 	{
 		deletionFlag = true;
 	}
@@ -63,6 +65,7 @@ void Projectile::Collided()
 	//setup in this way specifically so that -1 healthpoints would be infinite. Not currently used that way.
 	if (healthPoints > 0)
 	{
+		//decrement health
 		healthPoints--;
 
 		if (healthPoints == 0)

@@ -18,17 +18,23 @@ Player::~Player()
 //override of update function
 void Player::Update(float frameTime)
 {
+	//update game object base
 	GameObject::Update(frameTime);
 
+	//wrap player around the screen
 	CheckForOutOfBounds();
 
+	//take care of inputs
 	HandleInput(frameTime);
 
+	//drop mine trail
 	if (autoMine)
 		DropMine();
 
+	//reduce cooldowns
 	bulletCooldown -= frameTime;
 	mineCooldown -= frameTime;
+	//update rotation
 	rotation = fmodf(rotation, 360);
 }
 
@@ -59,7 +65,7 @@ void Player::HandleInput(float frameTime)
 	//Up arrow key
 	if (IsKeyDown(KEY_UP))
 	{
-		//move forward
+		//move forwards
 		AccelerateTowards(forward, 0.5);
 	}
 	//down arrow key
@@ -72,11 +78,13 @@ void Player::HandleInput(float frameTime)
 	//left arrow key
 	if (IsKeyDown(KEY_LEFT))
 	{
+		//rotate counter-clockwise
 		rotation -= maxRotationalVelocity * frameTime;
 	}
 	//right arrow key
 	if (IsKeyDown(KEY_RIGHT))
 	{
+		//rotate clockwise
 		rotation += maxRotationalVelocity * frameTime;
 	}
 
@@ -91,10 +99,11 @@ void Player::HandleInput(float frameTime)
 	//Alt, to drop mines
 	if (IsKeyPressed(KEY_LEFT_ALT) || IsKeyPressed(KEY_RIGHT_ALT))
 	{
+		//toggle the auto-minelaying
 		autoMine = !autoMine;
 	}
 
-	//F1 button, fuck it
+	//F1 button for help screen
 	if (IsKeyPressed(KEY_F1))
 	{
 		//switch help flag
@@ -137,13 +146,16 @@ void Player::CheckForOutOfBounds()
 
 void Player::FireBullet(Vector2 direction)
 {
+	//check for cooldown timer
 	if (bulletCooldown <= 0)
 	{
+		//create projectile with proper trajectory and parameters
 		Vector2 fireVector = Vector2Normalize(direction);
 		fireVector = fireVector * bulletSpeed;
 		Projectile* bullet = new Projectile(bulletLifeTime, fireVector, bulletHealth, bulletSize);
 		bullet->setPosition(position);
 		Game::Instance->AddObject(bullet, true);
+		//reset cooldown
 		bulletCooldown = 1 / bulletFireRate;
 	}
 }
@@ -151,11 +163,14 @@ void Player::FireBullet(Vector2 direction)
 
 void Player::DropMine()
 {
+	//check for cooldown timer
 	if (mineCooldown <= 0)
 	{
+		//drop mine at player position with 0 speed (Yes it is just a projectile, the logic works for both)
 		Projectile* mine = new Projectile(mineLifeTime, Vector2Zero(), mineHealth, mineSize);
 		mine->setPosition(position);
 		Game::Instance->AddObject(mine, true);
+		//reset cooldown
 		mineCooldown = 1 / mineFireRate;
 	}
 }
