@@ -121,8 +121,12 @@ void Game::HandleDeletion()
     for (int i = 0; i < toDelete.size(); i++)
     {
         //remove objects from object vectors
-        _Erase_remove(allObjects, toDelete[i]);
-        _Erase_remove(toUpdate, toDelete[i]);
+        //_Erase_remove(allObjects, toDelete[i]);
+        //_Erase_remove(toUpdate, toDelete[i]);
+
+        //remove object from object vectors using Erase-Remove-idiom
+        allObjects.erase(remove(allObjects.begin(), allObjects.end(), toDelete[i]));
+        toUpdate.erase(remove(toUpdate.begin(), toUpdate.end(), toDelete[i]));
 
         //remove object from quadrant system, *before* deletion, otherwise positional data will likely be corrupted
         RemoveFromQuadrantSystem(toDelete[i]);
@@ -251,14 +255,17 @@ void Game::RemoveFromQuadrantSystem(GameObject* obj)
 }
 
 
-void Game::RemoveFromQuadrant(QuadrantKey quadrant, GameObject* obj)
+void Game::RemoveFromQuadrant(QuadrantKey quadrantKey, GameObject* obj)
 {
     //ensure that quadrant exists
-    if (worldGrid.count(quadrant) == 0)
+    if (worldGrid.count(quadrantKey) == 0)
         return;
     
+    //get relevant quadrant
+    vector<GameObject*> quadrant = worldGrid[quadrantKey];
+
     //use erase remove idiom to remove obj from quadrant 
-    _Erase_remove(worldGrid[quadrant], obj);
+    quadrant.erase(remove(quadrant.begin(), quadrant.end(), obj));
 
     //erasing quadrants is practically unnecessary, as the gameworld isn't that big. Otherwise, here empty quadrants could be deleted.
     /*//check if the quadrant is empty, if so get rid of it
