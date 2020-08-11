@@ -261,8 +261,10 @@ void Bird::CheckForCollision()
 	//since the obstacle list is sorted, and the nearest one is #0, and if any obstacle is close enough to collide #0 also is, we just check with #0
 	if (obstacles.size() > 0)
 	{
-		float distance = Vector2Distance(obstacles[0]->getPosition(), getPosition());
-		if (distance <= size + obstacles[0]->size)
+		GameObject* obj = obstacles[0];
+		float distance = Vector2Distance(obj->getPosition(), getPosition());
+		//if they overlap, and the obstacle hasn't raised its deletion flag yet (it does this after X number of hits, so a single bullet can't kill dozens of enemies)
+		if (distance <= size + obj->size && !obj->deletionFlag)
 		{
 			deletionFlag = true;
 			//inform obstacle that it hit something

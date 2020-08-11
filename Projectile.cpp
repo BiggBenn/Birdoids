@@ -60,6 +60,7 @@ void Projectile::Render()
 
 void Projectile::Collided()
 {
+	//setup in this way specifically so that -1 healthpoints would be infinite. Not currently used that way.
 	if (healthPoints > 0)
 	{
 		healthPoints--;

@@ -73,10 +73,11 @@ void Game::MainLoop()
             //
             for (int i = 0; i < toDelete.size(); i++)
             {
+                //remove objects from object vectors
                 _Erase_remove(allObjects, toDelete[i]);
                 _Erase_remove(toUpdate, toDelete[i]);
-                //allObjects.end() = remove(allObjects.begin(), allObjects.end(), toDelete[i]);
-                //toUpdate.end() = remove(toUpdate.begin(), toUpdate.end(), toDelete[i]);
+
+                //finally delete it 
                 delete toDelete[i];
             }
             //clear deletion vector
@@ -300,8 +301,8 @@ QuadrantKey Game::CalculateQuadrant(Vector2 position)
 void Game::DrawUI()
 {
     //prep score string
-    char* str = new char[128];
-    sprintf_s(str, 128, "Score: %.4d\nTime: %.0f\nBirds left: %.3d", score, timer, birdCounter);
+    char* str = new char[256];
+    sprintf_s(str, 256, "Score: %.4d\nTime: %.0f\nBirds left: %.3d", score, timer, birdCounter);
     //draw score in the top left corner
     DrawText(str, worldLeftBorder + 15, worldTopBorder + 15, 35, { 125,100,255,128 });
 
