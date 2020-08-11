@@ -7,3 +7,5 @@ The gameplay was surprisingly the easiest to implement, most of my time was spen
 and extending it to avoid obstacles well and such.
 Performance improvements were necessary to get it to run decent at higher boid count,
 and I had to extend raymath.h a bit regarding Vector2 for better performance and easier code writing.
+
+itch-io page which has windows executables: https://biggbenn.itch.io/birdoids
