@@ -72,7 +72,7 @@ void Game::MainLoop()
         if (IsKeyPressed(KEY_F1))
         {
             //switch help flag and pause flag
-            helpFlag = helpFlag;
+            helpFlag = !helpFlag;
             paused = !paused;
         }
 
