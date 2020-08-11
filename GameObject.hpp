@@ -46,7 +46,7 @@ protected:
 	float maxAcceleration = 160;
 
 	//previous position, saved for quadrant change calculations
-	Vector2 prevPosition;
+	Vector2 prevPosition = { 0,0 };
 
 	//
 	// Public Functions

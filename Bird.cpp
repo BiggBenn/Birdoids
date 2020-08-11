@@ -15,9 +15,11 @@ Bird::Bird() : GameObject()
 
 Bird::~Bird()
 {
+	//clear vectors
 	neighbors.clear();
 	obstacles.clear();
 
+	//increase score and decrement counter of birds
 	Game::getInstance()->score += 50;
 	Game::getInstance()->birdCounter--;
 }
@@ -153,6 +155,8 @@ void Bird::FindNearby(float range)
 			obstacles.push_back(obj);
 		}
 	}
+
+	allNearby.clear();
 }
 
 
@@ -182,7 +186,7 @@ Vector2 Bird::NearestNeighbor()
 {
 	//because the list of neighbors is already sorted, we can assume the first neighbor is the closest
 	if (neighbors.size() > 0)
-		return Vector2Subtract(neighbors[0]->getPosition(), getPosition());
+		return neighbors[0]->getPosition() - getPosition();
 	else
 		return Vector2Zero();
 }
@@ -253,7 +257,8 @@ Vector2 Bird::AverageNeighborPositions()
 		result = result + neighbor->getPosition() - getPosition();
 	}
 	//divide result by amount of values
-	result = result/ neighbors.size();
+	if(neighbors.size() != 0)
+		result = result / neighbors.size();
 	return result;
 }
 
