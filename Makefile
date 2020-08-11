@@ -17,7 +17,7 @@ $(EXE): $(OBJ_DEPS)
     $(CC) $(CFLAGS) $^ -o ./$@ -Wall -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 dir_obj:
-    mkdir $(OBJ_DIR)
+    mkdir -p $(OBJ_DIR)
 
 .PHONY: clean
 .PHONY: dir_obj
