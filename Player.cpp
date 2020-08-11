@@ -32,7 +32,7 @@ void Player::Update(float frameTime)
 		DropMine();
 
 	//reduce cooldowns
-	bulletCooldown -= frameTime;
+	fireCooldown -= frameTime;
 	mineCooldown -= frameTime;
 	//update rotation
 	rotation = fmodf(rotation, 360);
@@ -102,14 +102,13 @@ void Player::HandleInput(float frameTime)
 		//toggle the auto-minelaying
 		autoMine = !autoMine;
 	}
-
-	//F1 button for help screen
-	if (IsKeyPressed(KEY_F1))
-	{
-		//switch help flag
-		Game::Instance->helpFlag = !Game::Instance->helpFlag;
-	}
 	
+	//control button
+	if (IsKeyPressed(KEY_LEFT_CONTROL) || IsKeyPressed(KEY_RIGHT_CONTROL))
+	{
+		//switch firemode
+		rapidfire = !rapidfire;
+	}
 }
 
 
@@ -147,16 +146,36 @@ void Player::CheckForOutOfBounds()
 void Player::FireBullet(Vector2 direction)
 {
 	//check for cooldown timer
-	if (bulletCooldown <= 0)
+	if (fireCooldown <= 0)
 	{
+		//prep variables
+		float speed, lifeTime, projectileSize, fireRate;
+		int health;
+		if (rapidfire)
+		{
+			speed = rapidFireSpeed;
+			lifeTime = rapidFireLifetime;
+			projectileSize = rapidFireSize;
+			fireRate = rapidFireFireRate;
+			health = rapidFireHealth;
+		}
+		else
+		{
+			speed = bulletSpeed;
+			lifeTime = bulletLifeTime;
+			projectileSize = bulletSize;
+			fireRate = bulletFireRate;
+			health = bulletHealth;
+		}
+	
 		//create projectile with proper trajectory and parameters
 		Vector2 fireVector = Vector2Normalize(direction);
-		fireVector = fireVector * bulletSpeed;
-		Projectile* bullet = new Projectile(bulletLifeTime, fireVector, bulletHealth, bulletSize);
+		fireVector = fireVector * speed;
+		Projectile* bullet = new Projectile(lifeTime, fireVector, health, projectileSize);
 		bullet->setPosition(position);
 		Game::Instance->AddObject(bullet, true);
 		//reset cooldown
-		bulletCooldown = 1 / bulletFireRate;
+		fireCooldown = 1 / fireRate;
 	}
 }
 

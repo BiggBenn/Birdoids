@@ -42,7 +42,7 @@ void Game::MainLoop()
         // Update part of the cycle
         //
 
-        if (!victory)
+        if (!victory && !paused)
         {
 
             //get the time that passed
@@ -58,6 +58,14 @@ void Game::MainLoop()
             HandleDeletion();
 
             CheckForWinCondition();
+        }
+
+        //F1 button for help screen
+        if (IsKeyPressed(KEY_F1))
+        {
+            //switch help flag and pause flag
+            helpFlag = !Game::Instance->helpFlag;
+            paused = !paused;
         }
 
 
@@ -318,8 +326,7 @@ QuadrantKey Game::CalculateQuadrant(Vector2 position)
 void Game::DrawUI()
 {
     //prep score string
-    char* str = new char[256];
-    sprintf_s(str, 256, "Score: %.4d\nTime: %.0f\nBirds left: %.3d", score, timer, birdCounter);
+    const char* str = TextFormat("Score: %.4d\nTime: %.0f\nBirds left: %.3d", score, timer, birdCounter);
     //draw score in the top left corner
     DrawText(str, worldLeftBorder + 15, worldTopBorder + 15, 35, { 125,100,255,128 });
 
@@ -329,15 +336,13 @@ void Game::DrawUI()
     //draw help text if the player wants it
     if (helpFlag)
     {
-        string text = "Controls:\n\nArrow Keys: move forward/backward, turn left/right\nSpace: fire bullet forwards, breaks after 4 hits\nAlt: turn on/off laying of \"mines\", \nwhich break after 5 hits & last 120 seconds\nYour goal is to kill all the birds that flock around.\nYour score increases with each bird killed,\nand the score is divided by the time at the end. Good luck!\n\nHint: Unlike birds, you can wrap around the screen!\n\nDouble Hint: Use your mines to corral the birds,\nthen strike with your bullet!\n\nEscape to quit";
+        string text = "Controls:\n\nArrow Keys: move forward/backward, turn left/right\nRamming birds kills them!\nSpace: fire bullet forwards, big bullet breaks after 25 hits,\nwhile the fast bullet breaks after one\nCtrl: Switch between rapidfire and slowfire bullets\nAlt: turn on/off laying of \"mines\", \nwhich break after 5 hits & last 120 seconds\nYour goal is to kill all the birds that flock around.\nYour score increases with each bird killed,\nand the score is divided by the time at the end. Good luck!\n\nHint: Unlike birds, you can wrap around the screen!\n\nDouble Hint: Use your mines to corral the birds,\nthen strike with your bullet!\n\nEscape to quit";
         DrawText(text.c_str() , -350, worldTopBorder + 50, 30, WHITE);
     }
 
     if (victory)
     {
-        string str = "Congratulations!\nYou won the game,\nand killed all those darned birds!\n\nYour final score is: %.4d\n\nThank you for playing my crappy game :)";
-        char* victoryText = new char[str.size()];
-        sprintf_s(victoryText, str.size() + 32, str.c_str(), score);
+        const char* victoryText = TextFormat("Congratulations!\nYou won the game,\nand killed all those darned birds!\n\nYour final score is: %.4d\n\nThank you for playing my crappy game :)", score);
         DrawText(victoryText, -400, worldTopBorder + 250, 40, YELLOW);
     }
 }

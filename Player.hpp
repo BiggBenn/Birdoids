@@ -24,19 +24,39 @@ private:
 	float bulletFireRate = 0.3;
 
 	//how fast bullets go
-	float bulletSpeed = 101;
+	float bulletSpeed = 95;
 
 	//how long bullets last
-	float bulletLifeTime = 30;
+	float bulletLifeTime = 120;
 
 	//how many birds a bullet could maximally kill
-	int bulletHealth = 4;
+	int bulletHealth = 25;
 
 	//cooldown for firing, starts at interval and goes down
-	float bulletCooldown = 0;
+	float fireCooldown = 0;
 
 	//size of bullet
 	float bulletSize = 18;
+
+
+	//if rapidfire is enabled, switch bu
+	bool rapidfire = false;
+
+	//lifetime of rapid fire shots
+	float rapidFireLifetime = 0.7;
+
+	//Healthpoints of rapid fire shots
+	int rapidFireHealth = 1;
+
+	//speed of rapidfire shots
+	float rapidFireSpeed = 275;
+
+	//firerate in rapidfire mode
+	float rapidFireFireRate = 5;
+
+	//size of rapidfire bullets
+	float rapidFireSize = 3;
+
 
 	//Mine laying rate per second
 	float mineFireRate = 4;

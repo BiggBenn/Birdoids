@@ -41,6 +41,9 @@ public:
     //flag that controls whether controls are displayed or not
     bool helpFlag = false;
 
+    //flag that controls whether the game is paused or not
+    bool paused = false;
+
     //time that the game is running, for score purposes
     float timer = 0;
 
